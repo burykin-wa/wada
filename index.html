@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PolyEngage widget test</title>
+  </head>
+  <body>
+    <h1>PolyEngage widget test page</h1>
+    <p>Click the widget below to start the survey.</p>
+
+    <!-- ⬇️ REPLACE this whole tag with the exact snippet copied from Step 6 ⬇️ -->
+<div id="polyengage-voice-survey"></div>
+<script src="https://dev.polyengage.ai/voice-survey-widget.js"
+  data-campaign-key="pe_embed_upcoming42972_843592"
+  data-mode="button"
+  data-button-label="Take the survey by voice."
+  data-ai-name="Fanny"
+  data-entity-name="National Opinion Research"
+  data-survey-title="Upcoming42972"
+  data-description="A brief survey to gather public opinion on the upcoming election, focusing on candidate preference, economic importance, presidential approval, and healthcare policy."
+  data-session-url="https://us-central1-ai-polling-platform-dev.cloudfunctions.net/callReceive/web"
+  data-show-disclosure="true"
+  data-capture-ad-source="true"
+  data-container="#polyengage-voice-survey" async></script>
+    <!-- ⬆️ REPLACE ⬆️ -->
+  </body>
+</html>
