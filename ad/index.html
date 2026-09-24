@@ -32,7 +32,7 @@
   #726 — Arizona click-to-talk pilot · the ad creative as a working page
   ============================================================================
   Deploys to  https://burykin-wa.github.io/wada/ad
-  Campaign    pe_embed_arizona_election_poll_29ea32  (Arizona Election Poll)
+  Campaign    pe_embed_arpep632924_f1578e  (Arizona Election Poll)
 
   BUILT FROM  "1. Social Media Ad Mockup.png", with two deliberate departures:
 
@@ -136,16 +136,6 @@
       border-radius: 14px;
       box-shadow: 0 18px 50px rgba(23, 57, 107, .22);
     }
-    /* The card is far shorter than a phone screen, so the same scrim stops land
-       much higher up the photo. Push the wash down to keep the navy lede on a
-       pale sky rather than on the cactus. */
-    .creative::before {
-      background: linear-gradient(180deg,
-        rgba(255,255,255,.88) 0%,
-        rgba(255,255,255,.78) 34%,
-        rgba(255,255,255,.44) 56%,
-        rgba(255,255,255,0)   72%);
-    }
     .brand img { width: 180px; }
     h1 { font-size: 37px; }
   }
@@ -156,18 +146,40 @@
     object-fit: cover;
     object-position: 62% 50%;   /* keeps the tall saguaro in frame as the box narrows */
   }
+  /* ⚠️ Pairs with the phone-shaped source below. That file IS the window a phone was
+     already seeing, so there is nothing left to offset into — 62% here would shift the
+     framing a second time. Centre it. */
+  @media (max-width: 719px) { .creative__photo { object-position: 50% 50%; } }
 
-  /* Two scrims, doing opposite jobs — this is the mockup's tonal structure.
-     The sky is washed pale so the navy logo and headline read; the desert floor
-     is deepened so the white badge, the notice and the ring on the button read. */
-  .creative::before {
-    content: ""; position: absolute; inset: 0; z-index: -2;
+  /* ⚠️ The pale wash is anchored to the COPY, not to the viewport.
+     It used to be a percentage of the card height (fading out at 60%), which is a
+     guess about where the text ends — and the guess was wrong: on a 390x844 phone the
+     last two lines of the lede, "own words, with an AI / interviewer.", fell past the
+     fade and sat unscrimmed on cloud and cactus. Percentages of height cannot know how
+     many lines the copy wrapped to, and the answer changes with every screen size and
+     every edit to the sentence. Anchoring the gradient to `.top` means it always ends
+     below the last line, on any phone, whatever the copy says. */
+  .top {
+    position: relative;
+    margin: calc(-1 * clamp(22px, 6vw, 34px)) calc(-1 * clamp(22px, 6vw, 34px)) 0;
+    padding: clamp(22px, 6vw, 34px) clamp(22px, 6vw, 34px) 104px;
+    /* ⚠️ The wash stays near-opaque for the WHOLE copy block and only fades in the
+       padding BELOW it. The earlier ramp began thinning at 45%, which put the last two
+       lines on a wash of .66 — and measured contrast was never the problem there
+       (6.6:1, comfortably past AA). What hurt was VARIANCE: the ground under the final
+       line moved 8x more than under the first (luminance spread .130 vs .016) because
+       that is where cloud edges and a cactus ridge cross behind the type. A ratio is
+       computed against a flat field; the eye is separating letterforms from texture.
+       Holding the wash at ~.90 leaves a tenth of that texture, which is the fix —
+       raising contrast further would not have touched it. */
     background: linear-gradient(180deg,
-      rgba(255,255,255,.86) 0%,
-      rgba(255,255,255,.72) 26%,
-      rgba(255,255,255,.34) 46%,
-      rgba(255,255,255,0)   60%);
+      rgba(255,255,255,.93) 0%,
+      rgba(255,255,255,.91) 55%,
+      rgba(255,255,255,.88) 78%,
+      rgba(255,255,255,0)   100%);
   }
+  /* The desert floor still darkens on a fixed ramp: nothing is measured against it —
+     the badge, notice and button all sit in the bottom sixth by construction. */
   .creative::after {
     content: ""; position: absolute; inset: 0; z-index: -1;
     /* Runs deep at the very bottom on purpose: this photograph ends in bright
@@ -310,8 +322,34 @@
        here (we set no max-width of our own), and the "full-screen" backdrop
        renders as a 420px column pinned to the left edge. */
     max-width: none;
+    /* An ANIMATION, not a transition. The container flips from display:none to
+       display:grid the instant the widget writes its card into it, and `display` is
+       not transitionable — a `transition` here would simply never run. An animation
+       plays when an element starts being displayed, which is exactly the moment we
+       want. (`@starting-style` + `allow-discrete` is the modern way to transition
+       this; it is deliberately not used, because this page exists to be opened in
+       Facebook's in-app WebView and that is the last place to depend on a new CSS
+       feature.) */
+    animation: pe-overlay-in 300ms ease-out both;
   }
   #polyengage-voice-survey > * { width: 100%; max-width: 380px; }
+  /* ⚠️ Gated on `.pe-entering`, which the script at the end of the page adds for the
+     first render of a session only. Left ungated, this replays on EVERY state change:
+     the widget's render() clears the container and appends a brand-new card for
+     connecting, live and completion, and a fresh element always restarts its
+     animation. Measured — three or four rises and scales during one call, which reads
+     as the dialog flinching rather than opening. */
+  #polyengage-voice-survey.pe-entering > * {
+    animation: pe-card-in 340ms cubic-bezier(.2, .8, .25, 1) 60ms both;
+  }
+  @keyframes pe-overlay-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes pe-card-in {
+    from { opacity: 0; transform: translateY(12px) scale(.96); }
+    to   { opacity: 1; transform: none; }
+  }
 
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; animation: none !important; }
@@ -322,13 +360,56 @@
 <body>
 
 <main class="creative">
+  <!-- ⚠️ `sizes` here is NOT the box width, and that is the whole subtlety. Under
+       `object-fit: cover` the browser paints the image LARGER than its box and crops
+       the overflow: on a 390x844 phone the box is 390 CSS px but the painted width is
+       675 — 2025 device pixels at 3x. Feeding `sizes` the box width would under-select
+       and hand a phone a deliberately soft background. Hence 175vw on mobile (the
+       measured painted/box ratio) and the painted 573px on desktop.
+
+       ⚠️ 864 is the ceiling and cannot be raised. The crop already takes the source
+       photograph's FULL height (1920x1080), so every phone case above is served below
+       1:1 and upscaling would add bytes without adding detail. If the background needs
+       to be genuinely sharp on a phone, that requires a higher-resolution source from
+       the customer, not a re-encode. The 600 exists only to stop 1x desktops pulling
+       the full file for a 573px paint. -->
   <picture>
-    <source srcset="../img/desert-portrait.webp" type="image/webp">
+    <!-- PHONES get a differently CROPPED file, not a smaller one — art direction.
+         The 4:5 creative is far wider than a phone screen, so `object-fit: cover`
+         was throwing away 42% of its width before drawing anything: of the 864
+         source pixels, a 390x844 phone only ever shows the middle 499. This crop
+         IS those 499 (same region, same framing, same scale factor), so the picture
+         on screen is pixel-for-pixel what it was — it just stops shipping the two
+         side strips nobody sees. 136 KB -> 83 KB on every phone.
+         ⚠️ The crop window is NOT the centre of the 4:5 file. `object-position: 62%`
+         above shifts what a phone sees to the right, so the window is source x 226..725
+         (original x 1226), not x 182. A first attempt centred it and moved the whole
+         composition — SSIM 0.69 against the previous render. Re-derive the window from
+         the object-position if either crop is ever changed.
+         ⚠️ Exact for a ~19.5:9 phone. A squarer screen (390x667) sees a wider window
+         than this file holds, so it crops vertically instead — different framing, but
+         a legitimate one, and no upscaling. -->
+
+    <source media="(max-width: 719px)" type="image/webp" srcset="../img/desert-tall.webp">
+    <source media="(max-width: 719px)" srcset="../img/desert-tall.jpg">
+
+    <!-- Desktop keeps the 4:5 creative, where the card is wide enough to use it.
+         ⚠️ `sizes` is the PAINTED width (573px), not the 460px box — under cover the
+         browser draws larger than the box, and feeding it the box would under-select. -->
+    <source type="image/webp"
+            sizes="573px"
+            srcset="../img/desert-portrait-600.webp 600w,
+                    ../img/desert-portrait.webp 864w">
     <img class="creative__photo" src="../img/desert-portrait.jpg" width="864" height="1080"
+         sizes="573px"
+         srcset="../img/desert-portrait-600.jpg 600w,
+                 ../img/desert-portrait.jpg 864w"
          alt="Saguaro cacti lit by the setting sun in the Sonoran desert, Arizona"
          fetchpriority="high" decoding="async">
   </picture>
 
+  <!-- Brand + copy share one wrapper so the pale wash can be sized by the text. -->
+  <div class="top">
   <div class="brand">
     <img src="../img/logo.png" width="176" height="78" alt="American Encore">
   </div>
@@ -343,8 +424,13 @@
          the small print under the button, which is a demotion of the one thing a
          respondent most needs to know before tapping. Same wording as the landing-page
          mockup's lede, so the two pages agree. -->
-    <p class="lede">A short, nonpartisan survey about candidates and issues. You&rsquo;ll speak
-      naturally, in your own words, with an AI interviewer.</p>
+    <!-- ⚠️ "speak naturally" deliberately NOT repeated here: the badge below already
+         says it. The customer's post copy and their in-image caption were written to
+         sit in a Facebook feed where one is above the photo and one inside it; stacked
+         on one page they read as the same sentence twice. -->
+    <p class="lede">A short, nonpartisan survey about candidates and issues. Share your
+      thoughts in your own words with an AI interviewer.</p>
+  </div>
   </div>
 
   <div class="foot">
@@ -371,7 +457,11 @@
         <rect x="9" y="2" width="6" height="11" rx="3"></rect>
         <path d="M5 11a7 7 0 0 0 14 0M12 18v4"></path>
       </svg>
-      <span>Your browser will request microphone access.<br>You&rsquo;ll speak with an AI interviewer.</span>
+      <!-- ⚠️ Permission only. This line used to add "You'll speak with an AI
+           interviewer", which the lede above already says — the reader met the same
+           fact twice within one screen. The lede is where it belongs, because it is
+           part of the offer; here it was filler. -->
+      <span>Your browser will request microphone access.</span>
     </p>
 
     <!-- ⚠️ ATTRIBUTION. Not decoration and not boilerplate: this page carries a real
@@ -379,11 +469,13 @@
          that belongs to neither the organisation nor us. Without a line naming who is
          running it, a visitor who finds it sees an unattributed political survey
          wearing someone else's brand. Keep it on every deployment of this page,
-         wherever it ends up hosted. -->
+         wherever it ends up hosted.
+         ⚠️ Plain sentences, no dashes. This is the nearest thing on the page to a legal
+         notice, and that register uses full stops. -->
     <p class="disclaimer">
       Conducted by <strong>American Encore</strong> on the PolyEngage voice survey
-      platform. A pilot study &mdash; responses are recorded and used for research only,
-      and do not support or oppose any candidate or party.
+      platform. Responses are recorded and used for research only. Nothing here
+      supports or opposes any candidate or party.
     </p>
   </div>
 </main>
@@ -398,9 +490,32 @@
   our card and a second tap. The notice under the button is what replaces it.
 -->
 <script src="https://dev.polyengage.ai/voice-survey-widget.js"
-  data-campaign-key="pe_embed_arizona_election_poll_29ea32"
+  data-campaign-key="pe_embed_arpep632924_f1578e"
   data-trigger=".js-start-survey"
   data-container="#polyengage-voice-survey" async></script>
+
+<script>
+  /* Marks the FIRST render of a session so the dialog entrance plays once.
+     The widget's render() clears the container and appends a new card for every
+     state — connecting, live, completion — and a newly inserted element always
+     restarts its CSS animation, so the entrance would otherwise replay each time.
+     A MutationObserver batches the clear and the append into one callback, so the
+     container never looks empty mid-render; it only reports empty when the call has
+     genuinely ended and the widget rendered nothing, which re-arms the next open. */
+  (function () {
+    var root = document.getElementById('polyengage-voice-survey');
+    if (!root || typeof MutationObserver !== 'function') return;   // entrance is optional
+    var open = false, timer;
+    new MutationObserver(function () {
+      if (!root.firstChild) { open = false; root.classList.remove('pe-entering'); return; }
+      if (open) return;
+      open = true;
+      root.classList.add('pe-entering');
+      clearTimeout(timer);
+      timer = setTimeout(function () { root.classList.remove('pe-entering'); }, 460);
+    }).observe(root, { childList: true });
+  })();
+</script>
 
 </body>
 </html>

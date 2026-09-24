@@ -25,7 +25,7 @@
   #726 Phase 2 — Arizona click-to-talk pilot · the landing page
   ============================================================================
   Deploys to  https://burykin-wa.github.io/wada/survey/
-  Campaign    pe_embed_arizona_election_poll_29ea32
+  Campaign    pe_embed_arpep632924_f1578e
 
   BUILT FROM  "2. Landing Page Mockup.png" (desktop) and "3. Landing Page
   Mockup.png" (mobile). They are ONE responsive page, not two builds — but the
@@ -153,14 +153,20 @@
     font-family: var(--display); font-weight: 700;
     font-size: clamp(14px, 1.5vw, 17px); line-height: 1.22;
     color: var(--navy);
-    /* The mockup sets this over pale sky. Our photograph puts a dramatic sunset
-       there, so the type needs its own ground: a soft light plate rather than a
-       shadow, which on orange cloud just muddies. */
-    padding: 10px 12px;
-    border-radius: 8px;
-    background: rgba(250, 246, 240, .82);
-    -webkit-backdrop-filter: blur(2px);
-    backdrop-filter: blur(2px);
+    /* ⚠️ What sits behind this changes with the viewport, which is why a light glow
+       "just in case" was not enough. The art column is narrow at 900px and nearly
+       full-width at 1280+, so `object-fit: cover` shows the MIDDLE of the photograph
+       on a small laptop and almost all of it on a large one — orange cloud in the
+       first case, pale sky in the second. Navy type survived the second and not the
+       first.
+       A halo rather than the plate that was here before: it lifts the type off the
+       cloud without drawing a box on the picture. Layered small-to-large so the
+       innermost ring stays tight to the letterforms instead of fogging them. */
+    text-shadow:
+      0 0 2px  rgba(255,255,255,.95),
+      0 0 6px  rgba(255,255,255,.9),
+      0 0 16px rgba(255,255,255,.75),
+      0 0 30px rgba(255,255,255,.6);
   }
   }
 
@@ -271,6 +277,42 @@
   .foot__note { margin: 8px 0 0; color: var(--slate); font-size: 13px; line-height: 1.45; }
   .foot__attrib { margin: 10px 0 0; color: var(--slate); font-size: 13px; line-height: 1.45; }
 
+  /* =========================================== mobile hero (mockup #3) ====
+     Mockup #3 is NOT mockup #2 narrowed — the hero is rebuilt for the phone, in
+     four ways that are each visible in the drawing:
+       · headline and lede are CENTRED (they are left-aligned on desktop);
+       · the photograph runs edge to edge, with no rounding and no gutter;
+       · it fades UPWARD into the cream instead of starting with a hard edge, so
+         the lede appears to sit on the sky;
+       · the button is on WHITE below the photograph, not on the cream beside it.
+     ============================================================================ */
+  @media (max-width: 899px) {
+    .hero__inner { gap: 0; }
+    .hero__text { text-align: center; }
+    .hero__lede { margin-inline: auto; }
+
+    /* The wrap is the full viewport below 1120px, so -20px is exactly its padding. */
+    .hero__art { margin-inline: -20px; margin-top: 4px; }
+    .hero__art img {
+      border-radius: 0;
+      max-height: 210px;
+      -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 38%);
+      mask-image: linear-gradient(180deg, transparent 0%, #000 38%);
+    }
+
+    .hero__actions {
+      background: var(--white);
+      margin-inline: -20px;
+      /* Pull the white panel out to the section's own bottom edge, so the cream
+         does not reappear as a strip under the button. */
+      margin-bottom: calc(-1 * clamp(26px, 5vw, 44px));
+      padding: 22px 20px clamp(26px, 5vw, 44px);
+      text-align: center;
+    }
+    .hero__actions .cta { width: 100%; }
+    .hero__actions .mic-note { justify-content: center; text-align: left; display: inline-flex; }
+  }
+
   /* =========================================== the conversation overlay === */
   #polyengage-voice-survey:empty { display: none; }
   #polyengage-voice-survey:not(:empty) {
@@ -282,8 +324,28 @@
        `max-width: 420px`. Without this the backdrop renders as a 420px column
        pinned to the left edge instead of covering the page. */
     max-width: none;
+    /* An ANIMATION, not a transition: the container flips from display:none the moment
+       the widget writes its card in, and `display` cannot be transitioned. An animation
+       runs when an element starts being displayed, which is the moment we want.
+       (`@starting-style` + `allow-discrete` is the modern route; avoided on purpose —
+       these pages are opened in Facebook's in-app WebView.) */
+    animation: pe-overlay-in 300ms ease-out both;
   }
   #polyengage-voice-survey > * { width: 100%; max-width: 380px; }
+  /* ⚠️ Gated on `.pe-entering` — see the script at the end of the page. The widget
+     clears and re-appends its card on every state change, and a new element always
+     restarts its animation, so ungated this plays three or four times per call. */
+  #polyengage-voice-survey.pe-entering > * {
+    animation: pe-card-in 340ms cubic-bezier(.2, .8, .25, 1) 60ms both;
+  }
+  @keyframes pe-overlay-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes pe-card-in {
+    from { opacity: 0; transform: translateY(12px) scale(.96); }
+    to   { opacity: 1; transform: none; }
+  }
 
   /* ========================================================== desktop ===== */
   @media (min-width: 900px) {
@@ -308,7 +370,10 @@
     /* ⚠️ The caption is positioned against .hero__art, which now extends PAST the
        viewport — so a plain `right: 16px` put it off-screen and clipped the word
        "Perspectives". Add the overhang back to keep it inside the wrap. */
-    .hero__caption { right: calc(var(--bleed) + 16px); }
+    /* Nudged right, toward the pale edge of the sky and away from the cacti that rise
+       into the middle of the frame at narrow widths. `--bleed` keeps it inside the
+       wrap; 4px is as close to that edge as it can sit without crowding it. */
+    .hero__caption { right: calc(var(--bleed) + 4px); }
     .hero__art img {
       border-radius: 10px 0 0 10px;
       -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 24%);
@@ -345,7 +410,12 @@
     .reason__icon { display: none; }
   }
 
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  /* ⚠️ `animation` as well as `transition`. The overlay entrance is an animation, so a
+     transition-only reset would have left it playing for exactly the people who asked
+     the OS not to animate things. */
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -372,9 +442,24 @@
       </div>
 
       <div class="hero__art">
+        <!-- srcset, because one file cannot be right for this box: it renders ~390 CSS px
+             on a phone and ~900 on a wide desktop, and each of those is multiplied by the
+             screen's pixel ratio. A single 1200 file is roughly 2x more than a 1x laptop
+             needs and slightly LESS than a 2x one does. `sizes` describes the box (full
+             width below the 900px breakpoint, ~47% of the viewport above it, where the
+             photo occupies the right column plus the bleed) so the browser picks before
+             it fetches. 1600 is the source's own width — deliberately not upscaled past it. -->
         <picture>
-          <source srcset="../img/hero-desert.webp" type="image/webp">
+          <source type="image/webp"
+                  sizes="(max-width: 899px) 100vw, 47vw"
+                  srcset="../img/hero-desert-600.webp 600w,
+                          ../img/hero-desert.webp 1200w,
+                          ../img/hero-desert-1600.webp 1600w">
           <img src="../img/hero-desert.jpg" width="1200" height="800"
+               sizes="(max-width: 899px) 100vw, 47vw"
+               srcset="../img/hero-desert-600.jpg 600w,
+                       ../img/hero-desert.jpg 1200w,
+                       ../img/hero-desert-1600.jpg 1600w"
                alt="A saguaro cactus and the Superstition Mountains at sunset, Arizona"
                fetchpriority="high" decoding="async">
         </picture>
@@ -391,7 +476,7 @@
             <rect x="9" y="2" width="6" height="11" rx="3"></rect>
             <path d="M5 11a7 7 0 0 0 14 0M12 18v4"></path>
           </svg>
-          <span>Your browser will request microphone access.<br>You&rsquo;ll speak with an AI interviewer.</span>
+          <span>Your browser will request microphone access.</span>
         </p>
       </div>
     </div>
@@ -508,9 +593,16 @@
 
 <!-- ============================== closing =============================== -->
 <section class="closer">
+  <!-- Full-bleed, so the box IS the viewport: sizes="100vw". This band sits under a
+       heavy warm wash and carries no detail anyone reads, so a phone takes the 800
+       and stops there rather than pulling 110 KB for a backdrop. -->
   <picture>
-    <source srcset="../img/band-desert.webp" type="image/webp">
-    <img src="../img/band-desert.jpg" width="1600" height="425" alt="" loading="lazy" decoding="async">
+    <source type="image/webp" sizes="100vw"
+            srcset="../img/band-desert-800.webp 800w, ../img/band-desert.webp 1600w">
+    <img src="../img/band-desert.jpg" width="1600" height="425"
+         sizes="100vw"
+         srcset="../img/band-desert-800.jpg 800w, ../img/band-desert.jpg 1600w"
+         alt="" loading="lazy" decoding="async">
   </picture>
   <div class="wrap">
     <h2>Your Voice Matters</h2>
@@ -526,7 +618,7 @@
         <rect x="9" y="2" width="6" height="11" rx="3"></rect>
         <path d="M5 11a7 7 0 0 0 14 0M12 18v4"></path>
       </svg>
-      <span>Your browser will request microphone access.<br>You&rsquo;ll speak with an AI interviewer.</span>
+      <span>Your browser will request microphone access.</span>
     </p>
   </div>
 </section>
@@ -544,9 +636,12 @@
     </p>
     <!-- ⚠️ ATTRIBUTION — keep on every deployment, wherever this is hosted. Without it
          a visitor sees an unattributed political survey wearing someone else's brand. -->
+    <!-- ⚠️ Plain sentences, no dashes — this sits next to a legal notice and should read
+         like one. It also no longer repeats "research purposes only", which the line
+         above already states in the customer's own words; this line is attribution. -->
     <p class="foot__attrib">
       Conducted by <strong>American Encore</strong> on the PolyEngage voice survey platform.
-      A pilot study &mdash; responses are recorded and used for research only.
+      Responses are recorded.
     </p>
   </div>
 </footer>
@@ -555,9 +650,32 @@
 <div id="polyengage-voice-survey"></div>
 
 <script src="https://dev.polyengage.ai/voice-survey-widget.js"
-  data-campaign-key="pe_embed_arizona_election_poll_29ea32"
+  data-campaign-key="pe_embed_arpep632924_f1578e"
   data-trigger=".js-start-survey"
   data-container="#polyengage-voice-survey" async></script>
+
+<script>
+  /* Marks the FIRST render of a session so the dialog entrance plays once.
+     The widget's render() clears the container and appends a new card for every
+     state — connecting, live, completion — and a newly inserted element always
+     restarts its CSS animation, so the entrance would otherwise replay each time.
+     A MutationObserver batches the clear and the append into one callback, so the
+     container never looks empty mid-render; it only reports empty when the call has
+     genuinely ended and the widget rendered nothing, which re-arms the next open. */
+  (function () {
+    var root = document.getElementById('polyengage-voice-survey');
+    if (!root || typeof MutationObserver !== 'function') return;   // entrance is optional
+    var open = false, timer;
+    new MutationObserver(function () {
+      if (!root.firstChild) { open = false; root.classList.remove('pe-entering'); return; }
+      if (open) return;
+      open = true;
+      root.classList.add('pe-entering');
+      clearTimeout(timer);
+      timer = setTimeout(function () { root.classList.remove('pe-entering'); }, 460);
+    }).observe(root, { childList: true });
+  })();
+</script>
 
 </body>
 </html>
