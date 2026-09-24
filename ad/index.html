@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Arizona Voters, Share Your Voice — American Encore</title>
+<meta name="description" content="A short, nonpartisan survey about candidates and issues. Speak naturally, in your own words, with an AI interviewer.">
+
+<!-- Open Graph — this is what Facebook renders when the link is posted, and posting
+     the link to Facebook IS the pilot. Without these, the card falls back to a bare
+     URL and the first thing an ad-clicker sees is nothing.
+
+     ⚠️ These URLs are ABSOLUTE while every asset on the page is relative, and the
+     difference is not an oversight. A relative og:image or og:url is meaningless to
+     Facebook's crawler — it needs an address it can fetch from outside. So this is
+     the ONE place the host is hard-coded, and it has to be re-pointed if the page
+     moves. (The `/s/` route makes the same split for the same reason.) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Arizona Voters, Share Your Voice">
+<meta property="og:description" content="A short, nonpartisan survey about candidates and issues. Speak naturally, in your own words, with an AI interviewer.">
+<meta property="og:site_name" content="American Encore">
+<meta property="og:url" content="https://burykin-wa.github.io/wada/ad/">
+<meta property="og:image" content="https://burykin-wa.github.io/wada/img/og-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Saguaro cacti lit by the setting sun in the Sonoran desert, Arizona">
+<meta name="twitter:card" content="summary_large_image">
+
+<!--
+  ============================================================================
+  #726 — Arizona click-to-talk pilot · the ad creative as a working page
+  ============================================================================
+  Deploys to  https://burykin-wa.github.io/wada/ad
+  Campaign    pe_embed_arizona_election_poll_29ea32  (Arizona Election Poll)
+
+  BUILT FROM  "1. Social Media Ad Mockup.png", with two deliberate departures:
+
+  1. NO FACEBOOK POST CHROME — but the post COPY is kept. The mockup's feed post
+     has three separable parts, and only one is Meta's:
+       · avatar row, "Sponsored", "…", Like / Comment / Share  → DROPPED. Not
+         because it is redundant but because it would be false: Facebook's own
+         UI drawn on a page that is not Facebook.
+       · the American Encore mark in that row → dropped as genuinely redundant;
+         the creative shows the same mark larger, immediately below.
+       · the post copy above the image → KEPT, as the lede. It is the
+         advertiser's own words and carries two facts the creative's internal
+         caption does not: "candidates and issues", and that you speak with an
+         AI INTERVIEWER.
+
+  2. A MICROPHONE NOTICE WAS ADDED under the button. The mockup has none,
+     because in the mockup the ad leads somewhere else. Here the button starts
+     the survey, and we turn the widget's own disclosure card off to keep it to
+     one tap — so the page has to say what the card would have said. Removing
+     the card is relocating the disclosure, not dropping it.
+
+  ⚠️ ONE TAP IS THE FLOOR. getUserMedia needs a gesture on THIS document; the
+  tap that opened the ad happened inside Facebook's and grants nothing here. A
+  page that dialled on load would get a suspended AudioContext, the respondent
+  would hear silence, and the inactivity timer would close the call — logged as
+  a drop-off rather than an audio fault. (#596 / #580)
+
+  ⚠️ PATHS ARE RELATIVE. The site is served under /wada/, so "../img/x" is
+  required; "/img/x" resolves to the domain root and 404s on GitHub Pages.
+
+  ⚠️ THE ORIGIN MUST BE ALLOWLISTED. The web door admits the page's exact
+  Origin, so https://burykin-wa.github.io must be the campaign's Allowed
+  Domain or every session is refused and the button looks broken.
+
+  ⚠️ THE WIDGET SRC POINTS AT DEV. Moving this pilot to production means
+  editing that line by hand; nothing will warn you.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@600;700;800&family=Source+Sans+3:wght@400;600&display=swap">
+
+<style>
+  /* Single committed visual world — a photographic ad creative looks the same
+     for every viewer, so there is no dark variant. Every colour is painted
+     explicitly rather than inherited from the host. */
+  :root {
+    color-scheme: light;
+    --navy:      #17396b;  /* headline + logo blue */
+    --teal:      #0e4d63;  /* CTA fill, sampled from the mockup */
+    --teal-hi:   #15607a;
+    --ground:    #ece3d6;  /* warm sand, for the desktop surround */
+    --ground-2:  #dccfbd;
+    --white:     #ffffff;
+    --display: "Libre Franklin", "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+    --body: "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    min-height: 100svh;
+    background: var(--ground);
+    background-image: radial-gradient(120% 80% at 50% 0%, var(--ground) 0%, var(--ground-2) 100%);
+    font-family: var(--body);
+    color: var(--navy);
+    display: grid;
+    place-items: center;
+    padding: 0;
+  }
+
+  /* ---------------------------------------------------------------- card --
+     Mobile: the creative IS the page — full bleed, filling the viewport.
+     Desktop: the same 4:5 card, centred, so it still reads as the ad it is
+     rather than a photograph stretched across a monitor. */
+  .creative {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    width: 100%;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(22px, 6vw, 34px);
+    background: #c8b49c; /* holds the composition if the photo is slow */
+  }
+
+  @media (min-width: 720px) {
+    body { padding: 32px 20px; }
+    .creative {
+      /* ⚠️ A fixed `aspect-ratio: 4/5` was the obvious way to hold the ad's
+         proportion here and it CLIPPED the disclaimer: the ratio fixes the height
+         while the copy decides how much height it needs, and `overflow: hidden`
+         (which the rounded corners and the photo both require) silently ate the
+         difference. A min-height keeps the proportion in practice and can never
+         cut the text off. */
+      min-height: 640px;
+      max-width: 460px;
+      border-radius: 14px;
+      box-shadow: 0 18px 50px rgba(23, 57, 107, .22);
+    }
+    /* The card is far shorter than a phone screen, so the same scrim stops land
+       much higher up the photo. Push the wash down to keep the navy lede on a
+       pale sky rather than on the cactus. */
+    .creative::before {
+      background: linear-gradient(180deg,
+        rgba(255,255,255,.88) 0%,
+        rgba(255,255,255,.78) 34%,
+        rgba(255,255,255,.44) 56%,
+        rgba(255,255,255,0)   72%);
+    }
+    .brand img { width: 180px; }
+    h1 { font-size: 37px; }
+  }
+
+  .creative__photo {
+    position: absolute; inset: 0; z-index: -3;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: 62% 50%;   /* keeps the tall saguaro in frame as the box narrows */
+  }
+
+  /* Two scrims, doing opposite jobs — this is the mockup's tonal structure.
+     The sky is washed pale so the navy logo and headline read; the desert floor
+     is deepened so the white badge, the notice and the ring on the button read. */
+  .creative::before {
+    content: ""; position: absolute; inset: 0; z-index: -2;
+    background: linear-gradient(180deg,
+      rgba(255,255,255,.86) 0%,
+      rgba(255,255,255,.72) 26%,
+      rgba(255,255,255,.34) 46%,
+      rgba(255,255,255,0)   60%);
+  }
+  .creative::after {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    /* Runs deep at the very bottom on purpose: this photograph ends in bright
+       sunlit sand, and the first render put white disclaimer text straight onto
+       it. The last two stops are legibility, not mood. */
+    background: linear-gradient(180deg,
+      rgba(18,28,38,0)   42%,
+      rgba(18,28,38,.34) 62%,
+      rgba(18,28,38,.72) 82%,
+      rgba(18,28,38,.88) 100%);
+  }
+
+  /* ---------------------------------------------------------------- brand -- */
+  .brand { text-align: center; }
+  .brand img {
+    width: clamp(168px, 46%, 208px);
+    height: auto;
+    display: inline-block;
+  }
+
+  /* ----------------------------------------------------------- headline -- */
+  .lede-zone { margin-top: clamp(20px, 5vh, 34px); }
+
+  h1 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(31px, 8.6vw, 41px);
+    line-height: 1.07;
+    letter-spacing: -.015em;
+    color: var(--navy);
+    text-wrap: balance;
+  }
+
+  .lede {
+    margin: clamp(12px, 2.4vh, 18px) 0 0;
+    max-width: 25ch;
+    font-size: clamp(16px, 4.2vw, 18px);
+    line-height: 1.42;
+    color: #1d3a5e;
+  }
+
+  /* ---------------------------------------------------------------- foot -- */
+  .foot { margin-top: auto; padding-top: 26px; }
+
+  .speak {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: clamp(16px, 3vh, 22px);
+  }
+  .speak__badge {
+    flex: 0 0 auto;
+    width: clamp(58px, 15vw, 68px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--white);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 4px 16px rgba(12, 22, 32, .28);
+  }
+  .speak__text {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(16px, 4.4vw, 18px);
+    line-height: 1.28;
+    color: var(--white);
+    text-shadow: 0 1px 8px rgba(10, 18, 26, .5);
+  }
+
+  /* The CTA. The white ring is not decoration — it is what separates a dark
+     teal pill from a dark photograph, and it is in the mockup for that reason. */
+  .cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    width: 100%;
+    padding: clamp(16px, 3.6vw, 19px) 26px;
+    border: 3px solid var(--white);
+    border-radius: 999px;
+    background: var(--teal);
+    color: var(--white);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(17px, 4.6vw, 20px);
+    letter-spacing: .005em;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 6px 22px rgba(10, 30, 40, .34);
+    transition: background-color .16s ease, transform .16s ease;
+  }
+  .cta:hover { background: var(--teal-hi); }
+  .cta:active { transform: translateY(1px); }
+  .cta:focus-visible { outline: 3px solid #ffd27a; outline-offset: 3px; }
+  .cta__arrow { font-size: 1.15em; line-height: 1; }
+
+  /* Added, not in the mockup — see the header note. */
+  .mic-note {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 8px;
+    margin: 13px 0 0;
+    color: rgba(255,255,255,.93);
+    font-size: 13px;
+    line-height: 1.38;
+    text-align: center;
+    text-shadow: 0 1px 6px rgba(10, 18, 26, .6);
+  }
+  .mic-note svg { flex: 0 0 auto; margin-top: 2px; }
+
+  .disclaimer {
+    margin: 14px 0 0;
+    text-align: center;
+    font-size: 11.5px;
+    line-height: 1.4;
+    color: rgba(255,255,255,.82);
+    text-shadow: 0 1px 6px rgba(10, 18, 26, .6);
+  }
+
+  /* ------------------------------------------------- the conversation ----
+     The widget renders into this container. Empty at rest (the page's own
+     button is the launcher), so it must take no space; once a call starts it
+     lifts to a centred overlay, because the creative fills the screen and a
+     call card appended below it would open off-screen. */
+  #polyengage-voice-survey:empty { display: none; }
+  #polyengage-voice-survey:not(:empty) {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(12, 22, 32, .74);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    /* ⚠️ Required. The widget adds its own `.pe-vs` class to whatever element it
+       mounts into, and that class carries `max-width: 420px`. Left alone it wins
+       here (we set no max-width of our own), and the "full-screen" backdrop
+       renders as a 420px column pinned to the left edge. */
+    max-width: none;
+  }
+  #polyengage-voice-survey > * { width: 100%; max-width: 380px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<main class="creative">
+  <picture>
+    <source srcset="../img/desert-portrait.webp" type="image/webp">
+    <img class="creative__photo" src="../img/desert-portrait.jpg" width="864" height="1080"
+         alt="Saguaro cacti lit by the setting sun in the Sonoran desert, Arizona"
+         fetchpriority="high" decoding="async">
+  </picture>
+
+  <div class="brand">
+    <img src="../img/logo.png" width="176" height="78" alt="American Encore">
+  </div>
+
+  <div class="lede-zone">
+    <h1>Arizona Voters,<br>Share Your Voice</h1>
+    <!-- The customer's own post copy, not the creative's shorter caption. In the ad
+         these are two separate texts: the caption inside the image says "about the
+         issues that matter to you", while the post copy above it adds the two facts
+         that actually set expectations — "candidates and issues", and that you speak
+         with an AI INTERVIEWER. Dropping the post copy left "AI interviewer" only in
+         the small print under the button, which is a demotion of the one thing a
+         respondent most needs to know before tapping. Same wording as the landing-page
+         mockup's lede, so the two pages agree. -->
+    <p class="lede">A short, nonpartisan survey about candidates and issues. You&rsquo;ll speak
+      naturally, in your own words, with an AI interviewer.</p>
+  </div>
+
+  <div class="foot">
+    <div class="speak">
+      <span class="speak__badge">
+        <svg width="30" height="26" viewBox="0 0 30 26" fill="#17396b" aria-hidden="true">
+          <rect x="0"  y="10" width="3.4" height="6"  rx="1.7"/>
+          <rect x="6"  y="6"  width="3.4" height="14" rx="1.7"/>
+          <rect x="12" y="1"  width="3.4" height="24" rx="1.7"/>
+          <rect x="18" y="5"  width="3.4" height="16" rx="1.7"/>
+          <rect x="24" y="9"  width="3.4" height="8"  rx="1.7"/>
+        </svg>
+      </span>
+      <span class="speak__text">Speak naturally.<br>Be heard.</span>
+    </div>
+
+    <button type="button" class="cta js-start-survey">
+      Start Voice Survey <span class="cta__arrow" aria-hidden="true">&rarr;</span>
+    </button>
+
+    <p class="mic-note">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <rect x="9" y="2" width="6" height="11" rx="3"></rect>
+        <path d="M5 11a7 7 0 0 0 14 0M12 18v4"></path>
+      </svg>
+      <span>Your browser will request microphone access.<br>You&rsquo;ll speak with an AI interviewer.</span>
+    </p>
+
+    <!-- ⚠️ ATTRIBUTION. Not decoration and not boilerplate: this page carries a real
+         organisation's mark and asks real voters about a real election, from a host
+         that belongs to neither the organisation nor us. Without a line naming who is
+         running it, a visitor who finds it sees an unattributed political survey
+         wearing someone else's brand. Keep it on every deployment of this page,
+         wherever it ends up hosted. -->
+    <p class="disclaimer">
+      Conducted by <strong>American Encore</strong> on the PolyEngage voice survey
+      platform. A pilot study &mdash; responses are recorded and used for research only,
+      and do not support or oppose any candidate or party.
+    </p>
+  </div>
+</main>
+
+<!-- The conversation renders here. -->
+<div id="polyengage-voice-survey"></div>
+
+<!--
+  data-trigger  — the button above is the launcher, so the widget draws nothing
+                  of its own and the CTA stays exactly as designed.
+  ⚠️ Set the campaign's on-screen disclosure to OFF, or tapping the button adds
+  our card and a second tap. The notice under the button is what replaces it.
+-->
+<script src="https://dev.polyengage.ai/voice-survey-widget.js"
+  data-campaign-key="pe_embed_arizona_election_poll_29ea32"
+  data-trigger=".js-start-survey"
+  data-container="#polyengage-voice-survey" async></script>
+
+</body>
+</html>
